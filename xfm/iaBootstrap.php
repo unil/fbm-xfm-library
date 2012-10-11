@@ -10,10 +10,10 @@ class iaBootstrap extends xBootstrap {
 
     function setup_includes_externals() {
         parent::setup_includes_externals();
-        require_once(xContext::$basepath.'/lib/iafbm/xfm/iaAuth.php');
-        require_once(xContext::$basepath.'/lib/iafbm/xfm/iaModelMysql.php');
-        require_once(xContext::$basepath.'/lib/iafbm/xfm/iaJournalingModelMysql.php');
-        require_once(xContext::$basepath.'/lib/iafbm/xfm/iaExtRestController.php');
+        require_once(xContext::$basepath.'/lib/fbm/xfm/iaAuth.php');
+        require_once(xContext::$basepath.'/lib/fbm/xfm/iaModelMysql.php');
+        require_once(xContext::$basepath.'/lib/fbm/xfm/iaJournalingModelMysql.php');
+        require_once(xContext::$basepath.'/lib/fbm/xfm/iaExtRestController.php');
     }
 
     function setup_auth() {
