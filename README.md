@@ -1,4 +1,4 @@
 fbm-xfm-library
 ===============
 
-xfm + extjs library for FBM projects
+xfm + extjs fbm-specific library components for FBM projects
