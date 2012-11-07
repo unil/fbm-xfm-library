@@ -10,9 +10,11 @@ abstract class iaJournalingModelMysql extends iaModelMysql {
 
     /**
      * Checks that the requested model_name or table_name is allowed.
+     * @param string Operation (get, putm post, delete).
+     * @param string Unused (declared for compatibility with iaModelMysql::check_allowed)
      * @see iaModelMysql::check_allowed()
      */
-    function check_allowed($operation) {
+    function check_allowed($operation, $modelname=null) {
         $this->check_allowed_model($operation);
     }
 
