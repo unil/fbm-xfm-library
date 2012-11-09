@@ -806,6 +806,16 @@ Ext.define('Ext.ia.grid.plugin.RowEditing', {
 });
 
 /**
+ * Overrides Ext.selection.RowModel
+ * to avoid page scroll on grid RowEditing change editing row.
+ */
+Ext.override(Ext.selection.RowModel, {
+    onRowMouseDown: function(view, record, item, index, e) {
+        this.selectWithEvent(record, e);
+    }
+});
+
+/**
  * Extends Ext.grid.Panel with
  * - Ext.ia.grid.plugin.RowEditing plugin
  */
