@@ -813,15 +813,17 @@ Ext.define('Ext.ia.grid.EditBasePanel', {
     extend: 'Ext.grid.Panel',
     alias: 'widget.ia-editbasepanel',
     editingPluginId: null,
+    editingPluginConfig: {},
     plugins: [],
     editable: true,
     pageSize: 0, // Disabled
     autoSync: false,
     initComponent: function() {
         // Creates Editing plugin (storing its id as grid property)
-        this.plugins = [new Ext.ia.grid.plugin.RowEditing({
-            pluginId: this.editingPluginId = Ext.id()
-        })];
+        this.plugins = [new Ext.ia.grid.plugin.RowEditing(Ext.apply(
+            this.editingPluginConfig,
+            {pluginId: this.editingPluginId = Ext.id()}
+        ))];
         // Initializes Component
         var me = this;
         me.callParent();
