@@ -946,7 +946,7 @@ Ext.define('Ext.ia.grid.EditPanel', {
         newRecordValues: {},
         searchParams: {}
     },
-    toolbarButtons: ['add', 'delete', 'save', 'search'],
+    toolbarButtons: ['add', '-', 'delete', '-', 'save', '->', 'search'],
     toolbarLabels: {
         add: 'Ajouter',
         delete: 'Supprimer',
@@ -981,93 +981,100 @@ Ext.define('Ext.ia.grid.EditPanel', {
     },
     makeDockedItems: function() {
         var me = this;
-        var add = {
-            text: this.toolbarLabels.add,
-            iconCls: 'icon-add',
-            handler: this.addItem,
-            scope: this,
-            updateState: function() {
-                this.setDisabled(!me.editable);
-            }
-        };
-        var del = {
-            text: this.toolbarLabels.delete,
-            iconCls: 'icon-delete',
-            handler: this.removeItem,
-            scope: this,
-            // Manages button disable state
-            disabled: true,
-            listeners: {afterrender: function() {
-                var grid = this.up('grid');
-                grid.on('selectionchange', this.updateState, this);
-            }},
-            updateState: function() {
-                var records = me.getSelectionModel().getSelection();
-                // Disables if no record selected,
-                // or if grid is not editable (see this.editable)
-                this.setDisabled(!(records.length && me.editable));
-            }
-        };
-        var save = {
-            text: this.toolbarLabels.save,
-            iconCls: 'icon-save',
-            handler: this.syncItems,
-            scope: this,
-            // Manages button disable state
-            disabled: true,
-            listeners: {afterrender: function() {
-                var store = this.up('grid').getStore();
-                store.on('add', this.updateState, this);
-                store.on('update', this.updateState, this);
-                store.on('remove', this.updateState, this);
-            }},
-            updateState: function() {
-                var store = me.getStore();
-                // Disables if no record selected,
-                // or if grid is not editable (see this.editable)
-                this.setDisabled(!store.getNonPristineRecords().length);
-            }
-        };
-        var search = new Ext.ia.form.SearchField({
-            store: null,
-            emptyText: 'Mots-clés',
-            listeners: {
-                // Wait for render time so that the grid store is created
-                // and ready to be bound to the search field
-                beforerender: function() { this.store = this.up('gridpanel').store },
-                beforesearch: function() { this.onBeforeSearch() },
-                aftersearch: function() { this.onResetSearch() },
-                resetsearch: function() { this.onResetSearch() },
+        var buttons = {
+            "->": '->',
+            "-": '-',
+            add: {
+                text: this.toolbarLabels.add,
+                iconCls: 'icon-add',
+                handler: this.addItem,
+                scope: this,
+                updateState: function() {
+                    this.setDisabled(!me.editable);
+                }
             },
-            onBeforeSearch: function() {
-                // Saves current store params
-                this._storeParams = Ext.clone(this.store.params);
-                // Applies searchParams to store proxy
-                this.store.params = Ext.apply(
-                    this.store.params,
-                    this.up('gridpanel').searchParams
-                );
+            del: {
+                text: this.toolbarLabels.delete,
+                iconCls: 'icon-delete',
+                handler: this.removeItem,
+                scope: this,
+                // Manages button disable state
+                disabled: true,
+                listeners: {afterrender: function() {
+                    var grid = this.up('grid');
+                    grid.on('selectionchange', this.updateState, this);
+                }},
+                updateState: function() {
+                    var records = me.getSelectionModel().getSelection();
+                    // Disables if no record selected,
+                    // or if grid is not editable (see this.editable)
+                    this.setDisabled(!(records.length && me.editable));
+                }
             },
-            onResetSearch: function() {
-                this.store.params = this._storeParams;
+            save: {
+                text: this.toolbarLabels.save,
+                iconCls: 'icon-save',
+                handler: this.syncItems,
+                scope: this,
+                // Manages button disable state
+                disabled: true,
+                listeners: {afterrender: function() {
+                    var store = this.up('grid').getStore();
+                    store.on('add', this.updateState, this);
+                    store.on('update', this.updateState, this);
+                    store.on('remove', this.updateState, this);
+                }},
+                updateState: function() {
+                    var store = me.getStore();
+                    // Disables if no record selected,
+                    // or if grid is not editable (see this.editable)
+                    this.setDisabled(!store.getNonPristineRecords().length);
+                }
             },
-            updateState: function() {
-                // Search is disabled if store is versioned
-                // because server-side does not support
-                // searching on versioned datasets yet.
-                this.setDisabled(me.store && me.store.params.xversion);
-            }
-        });
+            search: new Ext.ia.form.SearchField({
+                store: null,
+                emptyText: 'Recherche...',
+                listeners: {
+                    // Wait for render time so that the grid store is created
+                    // and ready to be bound to the search field
+                    beforerender: function() { this.store = this.up('gridpanel').store },
+                    beforesearch: function() { this.onBeforeSearch() },
+                    aftersearch: function() { this.onResetSearch() },
+                    resetsearch: function() { this.onResetSearch() },
+                },
+                onBeforeSearch: function() {
+                    // Saves current store params
+                    this._storeParams = Ext.clone(this.store.params);
+                    // Applies searchParams to store proxy
+                    this.store.params = Ext.apply(
+                        this.store.params,
+                        this.up('gridpanel').searchParams
+                    );
+                },
+                onResetSearch: function() {
+                    this.store.params = this._storeParams;
+                },
+                updateState: function() {
+                    // Search is disabled if store is versioned
+                    // because server-side does not support
+                    // searching on versioned datasets yet.
+                    this.setDisabled(me.store && me.store.params.xversion);
+                }
+            })
+        };
         // Adds items conditionally
         var items = [];
-        if (Ext.Array.contains(this.toolbarButtons, 'add'))
-            items.push(add);
-        if (Ext.Array.contains(this.toolbarButtons, 'delete'))
-            items.push('-', del);
-        if (Ext.Array.contains(this.toolbarButtons, 'save'))
-            items.push('-', save);
-        if (Ext.Array.contains(this.toolbarButtons, 'search'))
-            items.push('->', '-', this.toolbarLabels.search, search);
+        for (i in this.toolbarButtons) {
+            var button = this.toolbarButtons[i];
+            if (typeof button == 'string') {
+                if (!buttons[button]) {
+                    Ext.Error.raise('Unknown toolbar button: '+button);
+                }
+                items.push(buttons[button]);
+            } else {
+                items.push(button);
+            }
+        }
         // Creates and returns the toolbar with its items
         return [{
             xtype: 'toolbar',
