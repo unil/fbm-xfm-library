@@ -1140,6 +1140,7 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
         },
     },
     tbar: [],
+    deleteMode: 'global',
     initComponent: function() {
         // Component
         Ext.apply(this, this.grid);
@@ -1148,35 +1149,60 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
             'Ajouter',
             this.getCombo()
         ].concat(this.tbar);
-        // Bottom toolbar
-        this.bbar = [{
-            text: 'Supprimer la sélection',
-            iconCls: 'icon-delete',
-            handler: function() {
-                var grid = this.up('gridpanel');
-                var selection = grid.getView().getSelectionModel().getSelection()[0];
-                if (selection) grid.store.remove(selection);
-            },
-            disabled: true,
-            listeners: {afterrender: function() {
-                var me = this,
-                    grid = this.up('grid');
-                grid.on('selectionchange', function(view, records) {
-                    me.updateState();
-                });
-            }},
-            updateState: function() {
-                var grid = this.up('grid');
-                // Disables if no row selected
-                // or if grid is not editable (see this.editable)
-                var selection = grid.getSelectionModel().getSelection(),
-                    count = selection.length;
-                this.setDisabled(!(grid.editable && count));
-            }
-        }];
+        this.makeDelete();
         // Parent init
         var me = this;
         me.callParent();
+    },
+    makeDelete: function() {
+        // Delete button: 2 modes (global / perLine)
+        switch (this.deleteMode.toLowerCase()) {
+            // One global button in bottom toolbar => deletes selected line
+            case 'global':
+                // Bottom toolbar
+                this.bbar = [{
+                    text: 'Supprimer la sélection',
+                    iconCls: 'icon-delete',
+                    handler: function() {
+                        var grid = this.up('gridpanel');
+                        var selection = grid.getView().getSelectionModel().getSelection()[0];
+                        if (selection) grid.store.remove(selection);
+                    },
+                    disabled: true,
+                    listeners: {afterrender: function() {
+                        var me = this,
+                            grid = this.up('grid');
+                        grid.on('selectionchange', function(view, records) {
+                            me.updateState();
+                        });
+                    }},
+                    updateState: function() {
+                        var grid = this.up('grid');
+                        // Disables if no row selected
+                        // or if grid is not editable (see this.editable)
+                        var selection = grid.getSelectionModel().getSelection(),
+                            count = selection.length;
+                        this.setDisabled(!(grid.editable && count));
+                    }
+                }];
+                break;
+            // One button on each line => deletes current cliecked line
+            case 'perline':
+                this.grid.columns.push({
+                    xtype: 'actioncolumn',
+                    items: [{
+                        icon: x.context.baseuri + '/assets/img/extjs/delete.png',
+                        tooltip: 'Effacer',
+                        handler: function(grid, rowIndex) {
+                            var store = grid.store;
+                            var record = store.getAt(rowIndex);
+                            store.remove(record);
+                        }
+                    }],
+                    width: 40
+                });
+                break;
+        }
     },
     getCombo: function() {
         var me = this;
