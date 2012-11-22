@@ -1126,6 +1126,7 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
         },
         grid: {
             store: null,
+            columns: [],
             autoSync: false,
         },
         makeData: function(record) {
@@ -1141,8 +1142,7 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
     tbar: [],
     initComponent: function() {
         // Component
-        this.store = this.grid.store;
-        this.columns = this.grid.columns;
+        Ext.apply(this, this.grid);
         // Top toolbar
         this.tbar = [
             'Ajouter',
@@ -1179,10 +1179,10 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
         me.callParent();
     },
     getCombo: function() {
+        var me = this;
         // Sets pageSize to combo store
         this.combo.store.pageSize = this.combo.pageSize || this.config.combo.pageSize;
         // Creates combo instance
-        //return new Ext.ia.form.field.ComboBox({
         return new Ext.form.field.ComboBox({
             store: this.combo.store,
             pageSize: true, // Should equal the store.pageSize, but it works well like that...
@@ -1191,22 +1191,10 @@ Ext.define('Ext.ia.selectiongrid.Panel', {
             minChars: 1,
             hideTrigger: true,
             width: 350,
-            listConfig: {
+            listConfig: Ext.apply({
                 loadingText: 'Recherche...',
-                emptyText: 'Aucun résultat.',
-                // Custom rendering template for each item
-                getInnerTpl: function() {
-                    var img = x.context.baseuri+'/a/img/icons/trombi_empty.png';
-                    return [
-                        '<div>',
-                        '  <img src="'+img+'" style="float:left;height:39px;margin-right:5px"/>',
-                        '  <h3>{prenom} {nom}</h3>',
-                        '  <div>{pays_nom}{[values.pays_nom ? ",":"&nbsp;"]} {pays_code}</div>',
-                        '  <div>{[values.date_naissance ? Ext.Date.format(values.date_naissance, "j M Y") : "&nbsp;"]}</div>',
-                        '</div>'
-                    ].join('');
-                }
-            },
+                emptyText: 'Aucun résultat.'
+            }, me.combo.listConfig),
             listeners: {
                 select: function(combo, selection) {
                     // Inserts record into grid store
