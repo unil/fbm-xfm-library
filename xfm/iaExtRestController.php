@@ -163,10 +163,9 @@ class iaExtRestController extends xWebController {
             $this->params
         )->get();
         // Determines wheter to return a 404 status
-        // FIXME: Why not: inhibit the 404 only when 'xquery'?
         $pk = xModel::load($this->model)->primary();
         $fields = array_keys(xModel::load($this->model)->mapping);
-        $by_id = in_array($pk, array_keys($this->params)) && !array_intersect($this->params, $fields);
+        $by_id = in_array($pk, array_keys($this->params)) && !@array_intersect($this->params, $fields);
         if ($by_id && !$count) {
             $resource = xModel::load($this->model)->name;
             throw new xException("The requested {$resource} does not exist", 404);
