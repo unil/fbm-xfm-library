@@ -1037,22 +1037,7 @@ Ext.define('Ext.ia.grid.EditPanel', {
                 listeners: {
                     // Wait for render time so that the grid store is created
                     // and ready to be bound to the search field
-                    beforerender: function() { this.store = this.up('gridpanel').store },
-                    beforesearch: function() { this.onBeforeSearch() },
-                    aftersearch: function() { this.onResetSearch() },
-                    resetsearch: function() { this.onResetSearch() },
-                },
-                onBeforeSearch: function() {
-                    // Saves current store params
-                    this._storeParams = Ext.clone(this.store.params);
-                    // Applies searchParams to store proxy
-                    this.store.params = Ext.apply(
-                        this.store.params,
-                        this.up('gridpanel').searchParams
-                    );
-                },
-                onResetSearch: function() {
-                    this.store.params = this._storeParams;
+                    beforerender: function() { this.store = this.up('gridpanel').store }
                 },
                 updateState: function() {
                     // Search is disabled if store is versioned
