@@ -1031,6 +1031,12 @@ Ext.define('Ext.ia.grid.EditPanel', {
                     this.setDisabled(!store.getNonPristineRecords().length);
                 }
             },
+            lineCount: {
+                text: '',
+                xtype: 'tbtext',
+                id: 'lineCount',
+                scope: this,
+            },
             search: new Ext.ia.form.SearchField({
                 store: null,
                 emptyText: 'Recherche...',
