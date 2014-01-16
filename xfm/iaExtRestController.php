@@ -262,34 +262,39 @@ class iaExtRestController extends xWebController {
     protected function handle_sort() {
         $params = $this->params;
         if (strlen(@$params['xsort']) > 0) {
-            $info = array_shift(json_decode($params['xsort']));
-            $property = @$info->property;
-            $direction = @$info->direction;
-            // Manages substitutions
-            // @see self::$sort_fields_substitutions
-            if (in_array($property, array_keys($this->sort_fields_substitutions))) {
-                // Substitutes field name
-                $info = $this->sort_fields_substitutions[$property];
-                if (is_array($info)) {
-                    $property_substitued = @$info['field'];
-                    $join = @$info['join'];
-                } else {
-                    $property_substitued = $info;
-                    $join = null;
+            $info = json_decode(stripslashes(urldecode($params['xsort'])));
+            $condition = array();
+            foreach ($info as $item) {
+                $property = @$item->property;
+                $direction = @$item->direction;
+                // Manages substitutions
+                // @see self::$sort_fields_substitutions
+                if (in_array($property, array_keys($this->sort_fields_substitutions))) {
+                    // Substitutes field name
+                    $item = $this->sort_fields_substitutions[$property];
+                    if (is_array($item)) {
+                        $property_substitued = @$item['field'];
+                        $join = @$item['join'];
+                    } else {
+                        $property_substitued = $item;
+                        $join = null;
+                    }
+                    if (!$property_substitued) throw new xException("Error substituing field ($property_substitued)");
+                    $property = $property_substitued;
+
+                    // Activates join(s) relative to field (if applicable),
+                    // preserving already active joins
+                    if ($join) {
+                        $params['xjoin'] = array_merge(
+                            array_keys(xModel::load($this->model, $params)->joins()),
+                            array_keys(xModel::load($this->model, array('xjoin' => $join))->joins())
+                        );
+                    }
                 }
-                if (!$property_substitued) throw new xException("Error substituing field ($property_substitued)");
-                $property = $property_substitued;
-                // Activates join(s) relative to field (if applicable),
-                // preserving already active joins
-                if ($join) {
-                    $params['xjoin'] = array_merge(
-                        array_keys(xModel::load($this->model, $params)->joins()),
-                        array_keys(xModel::load($this->model, array('xjoin' => $join))->joins())
-                    );
-                }
+                $condition[] = $property;
             }
             // Adds model parameters
-            $params['xorder_by'] = $property;
+            $params['xorder_by'] = $condition;
             $params['xorder'] = $direction;
             unset($params['xsort']);
             // Sets modified parameters
